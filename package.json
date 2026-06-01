@@ -1,0 +1,19 @@
+{
+  "name": "hub-framework",
+  "version": "1.0.0",
+  "description": "Hub Framework for application infrastructure",
+  "main": "index.js",
+  "type": "commonjs",
+  "peerDependencies": {
+    "pino": "^9.12.0",
+    "node-cache": "^5.1.2",
+    "generic-pool": "^3.9.0",
+    "xmlbuilder2": "^3.1.1"
+  },
+  "dependencies": {
+    "bottlejs": "^2.0.1"
+  },
+  "keywords": ["framework", "dependency-injection", "container"],
+  "author": "",
+  "license": "ISC"
+}
