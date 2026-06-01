@@ -106,6 +106,14 @@ function paginateQuery(options) {
  * Build ORDER BY clause from array of ordering rules using strategy
  */
 function buildOrderByClause(orderBy, strategy) {
+    if (!Array.isArray(orderBy)) {
+        return '';
+    }
+
+    if (orderBy.length === 0) {
+        return '1 ASC';
+    }
+    
     return orderBy
         .map(o => {
             let column = o.dateFormat
