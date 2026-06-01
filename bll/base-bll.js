@@ -3,6 +3,7 @@ class BaseBll {
     
     constructor(container) {
         this.container = container;
+        this.logger = container.logger;
     }
 
     async getAdapter ()  {
@@ -15,37 +16,43 @@ class BaseBll {
     async readPaginated(qryBuilder, sessionValues) {
         const adapter = await this.getAdapter();
         const query = qryBuilder({...sessionValues, dbType:adapter.getDbType()}).paginate();
+        this.logger.debug({ query: query.query.replace(/\n/g, ' '), sessionValues }, 'Executing paginated query');
         return await adapter.query(query, sessionValues);
     }
 
     async read(qryBuilder, sessionValues) {
         const adapter = await this.getAdapter();
         const query = qryBuilder(sessionValues);
+        this.logger.debug({ query: query.query.replace(/\n/g, ' '), sessionValues }, 'Executing query');
         return await adapter.query(query, sessionValues);
     }
 
     async write(dmlBuilder, sessionValues) {
         const adapter = await this.getAdapter();
         const dml = dmlBuilder(sessionValues);
+        this.logger.debug({ dml: dml.query.replace(/\n/g, ' '), sessionValues }, 'Executing DML');
         return await adapter.dml(dml, sessionValues);
     }
 
     async writeReturning(dmlBuilder, sessionValues) {
         const adapter = await this.getAdapter();
         const dml = dmlBuilder(sessionValues);
+        this.logger.debug({ dml: dml.query.replace(/\n/g, ' '), sessionValues }, 'Executing DML with returning');
         return await adapter.dmlReturning(dml, sessionValues);
     }
     
     async withTransaction(callback) {
         const adapter = await this.getAdapter();
-        
+        this.logger.debug('Starting transaction');
         try {
             await adapter.beginTransaction();
             const result = await callback();
             await adapter.commitTransaction();
+            this.logger.debug('Transaction committed');
             return result;
         } catch (error) {
             await adapter.rollbackTransaction();
+            this.logger.debug('Transaction rolled back');
             throw error;
         }
     }

@@ -27,7 +27,7 @@ const convertBindsToObject = (bindsArray) => {
 
 const createExtRouter = (express, container) => {
     const router = express.Router();
-
+    const { logger } = container;
     router.post('/ext', async (req, res) => {
         const JSONParam = JSON.parse(req.body.JSONParam);
         const { class: cls, method, parameters } = JSONParam;
@@ -38,11 +38,12 @@ const createExtRouter = (express, container) => {
 
         asyncLocalStorage.run(requestContext, async () => {
             try {
+                logger.debug({ rqs, userId: requestContext.userId }, `Received request for ${cls}.${method}`);
                 const result = await executeRequest(container, rqs);
                 res.type('application/json');
                 res.send(result);
             } catch (err) {
-                console.error(`Error executing request for ${cls}.${method}:`, err);
+                logger.error({ rqs, userId: requestContext.userId, error: err }, `Error executing request for ${cls}.${method}`);
                 res.status(500).json({ success: false, error: err.message });
                 return;
             }
