@@ -38,7 +38,7 @@ const createExtRouter = (express, container) => {
 
         asyncLocalStorage.run(requestContext, async () => {
             try {
-                logger.debug({ rqs, userId: requestContext.userId }, `Received request for ${cls}.${method}`);
+                logger.debug({ rqs, userId: requestContext.userId }, `Received EXT request for ${cls}.${method}`);
                 const result = await executeRequest(container, rqs);
                 res.type('application/json');
                 res.send(result);

@@ -21,13 +21,13 @@ class SQL {
     }
 
     _append(str) {
-        this.query += str;
+        this.query += str.replace(/\s+/g, ' ').trim() + ' ';
         return this;
     }
 
     _appendIf(condition, str) {
         if (condition) {
-            this.query += str;
+            this.query += str.replace(/\s+/g, ' ').trim() + ' ';
         }
         return this;
     }
@@ -111,7 +111,7 @@ class SQL {
      */
     paginate() {
         const options = this._shapePaginationOptions(); // Shape the binds into the required format
-        this.query = paginateQuery(options); // Use the existing paginateQuery function
+        this.query = paginateQuery(options).replace(/\s+/g, ' ').trim(); // Use the existing paginateQuery function
         return this;
     }
 }
