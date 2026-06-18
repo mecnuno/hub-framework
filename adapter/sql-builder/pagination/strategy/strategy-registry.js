@@ -20,6 +20,7 @@ const dbStrategies = {
     sqlserver: mssqlStrategy, // Alias
     oracle: oracleStrategy,
     sqlite: sqliteStrategy,
+    turso: sqliteStrategy // Alias for SQLite-based Turso
 };
 
 /**

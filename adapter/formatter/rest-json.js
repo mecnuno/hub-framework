@@ -5,7 +5,7 @@ class RestJsonFormatter extends BaseFormatter {
             status: 'success',
             timestamp: new Date().toISOString(),
             resultCount: Array.isArray(data.rows) ? data.rows.length : 1,
-            data: data.rows
+            data: data
         };
     }
 }

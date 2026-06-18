@@ -1,114 +1,88 @@
-
 class BaseAdapter {
-    #binds = {}
-    #transactionIsActive = false
+    #binds = {};
 
     constructor() {
         if (new.target === BaseAdapter) {
-            throw new Error('Cannot instantiate abstract class BaseAdapter directly')
+            throw new Error('Cannot instantiate BaseAdapter directly');
         }
     }
+
+    // -------------------------
+    // Bind handling
+    // -------------------------
 
     getBinds() {
         return this.#binds;
     }
 
     setBinds(newBinds) {
-        this.#binds = { ...this.#binds, ...newBinds }
+        this.#binds = { ...this.#binds, ...newBinds };
         return this;
     }
 
     clearBinds() {
-        this.#binds = {}
-        return this
+        this.#binds = {};
+        return this;
     }
 
     #resolveBinds(localBinds) {
-        const conflicts = Object.keys(localBinds).filter(key => key in this.#binds);
-        if (conflicts.length > 0) {
+        const conflicts = Object.keys(localBinds).filter(k => k in this.#binds);
+
+        if (conflicts.length) {
             console.warn(`Local binds overwrite global binds: ${conflicts.join(', ')}`);
         }
-        return { ...this.#binds, ...localBinds }
+
+        return { ...this.#binds, ...localBinds };
     }
 
-    async query(queryStr, localBinds = {}) {
-        try {
-            const finalBinds = this.#resolveBinds(localBinds)
-            return await this._runQuery(queryStr, finalBinds)
-        } catch (error) {
-            throw this.#enhanceError(error, queryStr);
-        }
+    // -------------------------
+    // Public API
+    // -------------------------
+
+    async query(sql, binds = {}) {
+        const finalBinds = this.#resolveBinds(binds);
+        return this._runQuery(sql, finalBinds);
     }
 
-    async dml(dmlStr, localBinds = {}) {
-        try {
-            const finalBinds = this.#resolveBinds(localBinds)
-            return await this._runDML(dmlStr, finalBinds)
-        } catch (error) {
-            throw this.#enhanceError(error, dmlStr);
-        }
+    async dml(sql, binds = {}) {
+        const finalBinds = this.#resolveBinds(binds);
+        return this._runDML(sql, finalBinds);
     }
 
-    async dmlReturning(dmlStr, localBinds = {}) {
-        try {
-            const finalBinds = this.#resolveBinds(localBinds);
-            return await this._runDMLReturning(dmlStr, finalBinds);
-        } catch (error) {
-            throw this.#enhanceError(error, dmlStr);
-        }
+    async dmlReturning(sql, binds = {}) {
+        const finalBinds = this.#resolveBinds(binds);
+        return this._runDMLReturning(sql, finalBinds);
     }
 
-        // Strict (use in application logic)
+    // -------------------------
+    // Transaction API (NOW PROPER)
+    // -------------------------
+
     async beginTransaction() {
-        if (this.#transactionIsActive) {
-            throw new Error('Transaction already active');
-        }
-        await this._beginTransaction();
-        this.#transactionIsActive = true;
+        return this._beginTransaction();
     }
 
     async commitTransaction() {
-        if (!this.#transactionIsActive) {
-            throw new Error('No active transaction to commit');
-        }
-        await this._commitTransaction();
-        this.#transactionIsActive = false;
+        return this._commitTransaction();
     }
 
-    // Rollback is always safe (for error handlers)
     async rollbackTransaction() {
-        if (!this.#transactionIsActive){
-            return;
-        } 
-        await this._rollbackTransaction();
-        this.#transactionIsActive = false;
-    }
-
-    // Optional: Add safe versions if needed
-    async tryBeginTransaction() {
-        if (this.#transactionIsActive) return false;
-        await this._beginTransaction();
-        this.#transactionIsActive = true;
-        return true;
-    }
-
-    async tryCommitTransaction() {
-        if (!this.#transactionIsActive) return false;
-        await this._commitTransaction();
-        this.#transactionIsActive = false;
-        return true;
+        return this._rollbackTransaction();
     }
 
     async ensureTransaction() {
-        if (!this.#transactionIsActive) {
-            await this._beginTransaction()
-            this.#transactionIsActive = true
+        if (!this.getTransactionContext()) {
+            await this._beginTransaction();
         }
     }
 
     isTransactionActive() {
-        return this.#transactionIsActive
+        return !!this.getTransactionContext();
     }
+
+    // -------------------------
+    // Error handling
+    // -------------------------
 
     #enhanceError(error, sql) {
         error.sql = sql;
@@ -116,29 +90,45 @@ class BaseAdapter {
         return error;
     }
 
-    // Abstract methods to be implemented by concrete adapters
-    _runQuery(queryStr, binds) {
-        throw new Error('Subclasses must implement _runQuery')
+    // wrap errors consistently
+    async _safe(fn, sql) {
+        try {
+            return await fn();
+        } catch (err) {
+            throw this.#enhanceError(err, sql);
+        }
     }
 
-    _runDML(dmlStr, binds) {
-        throw new Error('Subclasses must implement _runDML')
+    // -------------------------
+    // Abstracts
+    // -------------------------
+
+    _runQuery() {
+        throw new Error('Must implement _runQuery');
     }
-    
-    _runDMLReturning(dmlStr, binds) {
-        throw new Error('Subclasses must implement _runDMLReturning');
+
+    _runDML() {
+        throw new Error('Must implement _runDML');
+    }
+
+    _runDMLReturning() {
+        throw new Error('Must implement _runDMLReturning');
     }
 
     _beginTransaction() {
-        throw new Error('Subclasses must implement _beginTransaction')
+        throw new Error('Must implement _beginTransaction');
     }
 
     _commitTransaction() {
-        throw new Error('Subclasses must implement _commitTransaction')
+        throw new Error('Must implement _commitTransaction');
     }
 
     _rollbackTransaction() {
-        throw new Error('Subclasses must implement _rollbackTransaction')
+        throw new Error('Must implement _rollbackTransaction');
+    }
+
+    getTransactionContext() {
+        throw new Error('Must implement getTransactionContext');
     }
 }
 

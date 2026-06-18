@@ -50,6 +50,7 @@ class TabularJsonFormatter extends BaseFormatter {
         if (!typeToInfer) return 'string';
 
         const t = typeToInfer.toLowerCase();
+
         if (['int', 'real', 'floa', 'doub'].some(k => t.includes(k))) return 'number';
         if (['char', 'clob', 'text'].some(k => t.includes(k))) return 'string';
         if (t.includes('blob')) return 'buffer';
@@ -63,25 +64,3 @@ class TabularJsonFormatter extends BaseFormatter {
 
 
 module.exports = TabularJsonFormatter;
-
-
-/*
-
-      #inferType(data, key) {
-        for (let row of data) {
-            const value = row[key];
-            if (value === null || value === undefined) continue;
-
-            const t = typeof value;
-            if (t === "number" || t === "boolean" || t === "string") {
-                return t;
-            }
-            if (value instanceof Date) return "date";
-            if (Array.isArray(value)) return "array";
-            return "object";
-        }
-
-        return "string"; // fallback
-    }
- 
- */
