@@ -8,7 +8,7 @@ module.exports = {
     bllCache: require('./proxy/bll-proxy').cache,
     asyncLocalStorage: require('./proxy/request-context'),
     createExtRouter: require('./proxy/ext.proxy'),
-    ouputFormats:{
+    outputFormats:{
         json: require('./adapter/formatter/json'),
         tabularJson: require('./adapter/formatter/tabular-json'),
         restJson:require('./adapter/formatter/rest-json'),

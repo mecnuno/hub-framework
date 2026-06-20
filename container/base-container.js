@@ -30,9 +30,9 @@ class BaseContainer {
     
     async afterAsyncRegisters() { 
         this.bottle.factory('getAdapter', (container) => {
-            return async () => {
+            return async (formatter = container.adapterFormatter) => {
                 const db = await DBDriver(container.dbPool);
-                const adapter = new RDBMSAdapter(db, container.adapterFormatter);
+                const adapter = new RDBMSAdapter(db, formatter);
                 return adapter;
             }
         });

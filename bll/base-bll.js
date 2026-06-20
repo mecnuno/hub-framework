@@ -45,13 +45,10 @@ class BaseBll {
         const adapter = await this.getAdapter();
         this.logger.debug('Starting transaction');
         try {
-            await adapter.beginTransaction();
-            const result = await callback();
-            await adapter.commitTransaction();
+            const result = await adapter.withTransaction(callback);
             this.logger.debug('Transaction committed');
             return result;
         } catch (error) {
-            await adapter.rollbackTransaction();
             this.logger.debug('Transaction rolled back');
             throw error;
         }

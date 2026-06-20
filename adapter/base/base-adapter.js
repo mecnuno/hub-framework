@@ -130,6 +130,18 @@ class BaseAdapter {
     getTransactionContext() {
         throw new Error('Must implement getTransactionContext');
     }
+
+    async withTransaction(callback) {
+        await this._beginTransaction();
+        try {
+            const result = await callback(this);
+            await this._commitTransaction();
+            return result;
+        } catch (err) {
+            await this._rollbackTransaction();
+            throw err;
+        }
+    }
 }
 
 module.exports = BaseAdapter;
