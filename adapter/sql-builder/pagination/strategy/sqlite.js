@@ -17,12 +17,13 @@ const sqliteStrategy = {
             throw new Error('Identifier must be a string');
         }
 
-        // Check if already properly quoted
-        if (identifier.startsWith('"') && identifier.endsWith('"')) {
+        /*if (identifier.startsWith('"') && identifier.endsWith('"')) {
+
             return identifier;
         }
 
-        return `"${identifier.replace(/"/g, '""')}"`;
+        return `"${identifier.replace(/"/g, '""')}"`;*/
+        return identifier;
     },
 
     /**
@@ -73,3 +74,4 @@ const sqliteStrategy = {
 };
 
 module.exports = sqliteStrategy;
+

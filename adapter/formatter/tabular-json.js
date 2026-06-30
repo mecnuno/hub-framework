@@ -8,16 +8,27 @@ class TabularJsonFormatter extends BaseFormatter {
         if (data && data.type === 'read') {
             let columns = data.columns || [],
                 rows = data.rows || [];
-            const formattedColumns = columns.map(col => ({ 
-                name: col.name.toUpperCase(), 
+            const formattedColumns = columns.map(col => ({
+                key: col.name,
+                name: col.name.toUpperCase(),
                 type: this.#inferType(col.type)
             }));
-            const formattedRows = rows.map(row => columns.map(col => row[col.name]));
+
+            let totalCount;
+            const lastColIndex = formattedColumns.length - 1;
+            if (formattedColumns[lastColIndex].name === 'TOTAL_COUNT') {
+                const lastItem = formattedColumns.pop();
+                totalCount = rows.length > 0 ? rows[0][lastItem.key] : 0;
+            }
+
+            const formattedRows = rows.map(row => formattedColumns.map(col => row[col.key]));
+            formattedColumns.forEach(col => delete col.key);
+
             return {
                 ...ret,
                 columns: formattedColumns,
                 rows: formattedRows,
-                total: formattedRows.length
+                total: totalCount ? totalCount : rows.length
             };
         }
 

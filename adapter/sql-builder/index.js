@@ -96,7 +96,8 @@ class SQL {
         return {
             sql: this.query, // Use the current query as the base SQL
             page: this.binds.page || 1,
-            pageSize: this.binds.pageSize || 1000,
+            pageSize: this.binds.limit || 1000,
+            start: this.binds.start || 0,
             sort: this.binds.sort || [], // Default to an empty array if not provided
             dbType: this.binds.dbType,
             includeCount: this.binds.includeCount || false,

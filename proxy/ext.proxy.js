@@ -1,4 +1,4 @@
-const  BaseContainer  = require('../container/base-container');
+const BaseContainer = require('../container/base-container');
 const { executeRequest } = require('./bll-proxy');
 const cache = require('./bll-cache');
 const asyncLocalStorage = require('./request-context');
@@ -29,12 +29,30 @@ const createExtRouter = (express, container) => {
     const router = express.Router();
     const { logger } = container;
     router.post('/ext', async (req, res) => {
-        const JSONParam = JSON.parse(req.body.JSONParam);
-        const { class: cls, method, parameters } = JSONParam;
+        const body = req.body;
+        const JSONParam = JSON.parse(body.JSONParam);
+        const page = body.page ? parseInt(body.page, 10) : 1;
+        const start = body.start ? parseInt(body.start, 10) : 0;
+        const limit = body.limit ? parseInt(body.limit, 10) : 20;
+        const sort = body.sort ? JSON.parse(body.sort) : [];
+        const filter = body.filter ? JSON.parse(body.filter) : [];
+        const { class: cls, method } = JSONParam;
 
-        const requestContext = { userId : req.user.id };
+        const requestContext = { userId: req.user.id };
 
-        const rqs = { class: cls, method, parameters: convertBindsToObject(parameters || []) };
+        const parameters = convertBindsToObject(JSONParam.parameters || []);
+        parameters.page = page;
+        parameters.start = start;
+        parameters.limit = limit;
+        parameters.sort = sort;
+
+        parameters.includeCount = true;//this should be parametric but i couldnt figure out how to pass it from the front end. I will add it later if needed.
+
+        const rqs = {
+            class: cls,
+            method,
+            parameters
+        };
 
         asyncLocalStorage.run(requestContext, async () => {
             try {
