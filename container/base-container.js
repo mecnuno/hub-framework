@@ -37,7 +37,13 @@ class BaseContainer {
             }
         });
     }
-
+    
+    async cleanup() {
+        if (this.bottle.container.dbPool) {
+            await this.bottle.container.dbPool.release();
+        }
+    }
+    
 }
 
 module.exports =  BaseContainer ;

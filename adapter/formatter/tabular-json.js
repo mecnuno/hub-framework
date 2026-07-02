@@ -72,6 +72,4 @@ class TabularJsonFormatter extends BaseFormatter {
     }
 }
 
-
-
 module.exports = TabularJsonFormatter;
